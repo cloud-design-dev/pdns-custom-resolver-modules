@@ -1,3 +1,3 @@
 output "security_group_id" {
-  value = ibm_is_security_group.workload.id
+  value = module.security_group.security_group_id
 }
