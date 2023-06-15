@@ -47,7 +47,7 @@ module "east_vpc" {
   default_cidr      = var.east_cidr
   resource_group_id = module.resource_group.resource_group_id
   zones             = values(local.vpc_zones)
-  tags              = local.tags
+  tags              = concat(local.tags, ["east"])
 }
 
 module "west_vpc" {
@@ -56,23 +56,39 @@ module "west_vpc" {
   default_cidr      = var.west_cidr
   resource_group_id = module.resource_group.resource_group_id
   zones             = values(local.vpc_zones)
-  tags              = local.tags
+  tags              = concat(local.tags, ["west"])
 }
 
-# module "east_security" {
-#   source            = "./modules/security"
-#   prefix            = "${local.project_prefix}-east"
-#   vpc_id = module.east_vpc.vpc_id
-#   resource_group_id = module.resource_group.resource_group_id
-#   tags              = local.tags
-# }
+module "east_security" {
+  source            = "./modules/security"
+  prefix            = "${local.project_prefix}-east"
+  vpc_id            = module.east_vpc.vpc_id
+  resource_group_id = module.resource_group.resource_group_id
+  tags              = concat(local.tags, ["east"])
+}
+
+module "west_security" {
+  source            = "./modules/security"
+  prefix            = "${local.project_prefix}-west"
+  vpc_id            = module.east_vpc.vpc_id
+  resource_group_id = module.resource_group.resource_group_id
+  tags              = concat(local.tags, ["west"])
+}
 
 # module "east_vpn" {
 #   source            = "./modules/vpn"
 #   prefix            = "${local.project_prefix}-east"
 #   vpc_id = module.east_vpc.vpc_id
 #   resource_group_id = module.resource_group.resource_group_id
-#   tags              = local.tags
+#   tags              = concat(local.tags, ["east"])
+# }
+
+# module "west_vpn" {
+#   source            = "./modules/vpn"
+#   prefix            = "${local.project_prefix}-west"
+#   vpc_id = module.east_vpc.vpc_id
+#   resource_group_id = module.resource_group.resource_group_id
+#   tags              = concat(local.tags, ["east"])
 # }
 
 module "east_compute" {
@@ -86,4 +102,18 @@ module "east_compute" {
   subnet            = module.east_vpc.subnet_id[0]
   tags              = local.tags
   security_group    = module.east_vpc.default_security_group
+  # will use module.east_security.security_group_id
+}
+
+module "west_compute" {
+  count             = 2
+  source            = "./modules/compute"
+  prefix            = "${local.project_prefix}-west-${count.index + 1}"
+  vpc_id            = module.west_vpc.vpc_id
+  resource_group_id = module.resource_group.resource_group_id
+  zone              = local.vpc_zones[0]
+  ssh_keys          = local.ssh_key_ids
+  subnet            = module.west_vpc.subnet_id[0]
+  tags              = local.tags
+  security_group    = module.west_vpc.default_security_group
 }
