@@ -6,7 +6,6 @@ locals {
   ssh_key_ids = var.existing_ssh_key != "" ? [data.ibm_is_ssh_key.sshkey[0].id] : [ibm_is_ssh_key.generated_key[0].id]
 
   tags = [
-    "owner:${var.owner}",
     "provider:ibm",
     "region:${var.region}",
     "project:${local.project_prefix}",
