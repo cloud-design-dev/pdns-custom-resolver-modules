@@ -1,13 +1,13 @@
 variable "region" {
   description = "The region where the VPC and associated resources will be created."
   type        = string
-  default     = "ca-tor"
+  default     = "us-south"
 }
 
 variable "existing_resource_group" {
   description = "Existing resource group name. If not set, a new resource group will be created."
   type        = string
-  default     = "CDE"
+  default     = null
 }
 
 variable "project_prefix" {
@@ -16,16 +16,10 @@ variable "project_prefix" {
   default     = null
 }
 
-variable "owner" {
-  description = "The owner of the deployed resources. This will be set as a tag on each resource."
-  type        = string
-  default     = "ryantiffany"
-}
-
 variable "existing_ssh_key" {
   description = "Existing SSH key name. If not set, a new SSH key will be created."
   type        = string
-  default     = "rst-ca-tor"
+  default     = null
 }
 
 variable "east_cidr" {
